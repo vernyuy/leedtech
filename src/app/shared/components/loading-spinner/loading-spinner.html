@@ -1,0 +1,14 @@
+<div class="inline-flex items-center gap-3" role="status" aria-live="polite">
+  <span
+    class="inline-flex animate-spin rounded-full border-2 border-slate-300 border-t-slate-700"
+    [class.h-4]="size() === 'sm'"
+    [class.w-4]="size() === 'sm'"
+    [class.h-6]="size() === 'md'"
+    [class.w-6]="size() === 'md'"
+    [class.h-8]="size() === 'lg'"
+    [class.w-8]="size() === 'lg'"
+  ></span>
+  @if (showLabel()) {
+    <span class="text-sm text-slate-600">{{ label() }}</span>
+  }
+</div>

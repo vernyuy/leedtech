@@ -1,0 +1,11 @@
+@if (show() && message()) {
+  <div
+    class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+    role="alert"
+    aria-live="polite"
+    [id]="id() || null"
+  >
+    <lucide-icon [name]="icon" [size]="16" aria-hidden="true"></lucide-icon>
+    <span class="leading-snug">{{ message() }}</span>
+  </div>
+}

@@ -1,0 +1,22 @@
+<button
+  [class]="buttonClasses"
+  [disabled]="disabled || loading"
+  [attr.type]="type"
+  [attr.aria-label]="ariaLabel || null"
+  [attr.aria-pressed]="ariaPressed"
+  [attr.aria-controls]="ariaControls || null"
+  (click)="onClick($event)"
+>
+  <span class="inline-flex items-center gap-2.5">
+    @if (loading && showSpinner) {
+      <span [class]="spinnerClasses" aria-hidden="true"></span>
+    }
+    @if (icon && iconPosition === 'left') {
+      <lucide-icon [name]="icon" [size]="iconSize" aria-hidden="true"></lucide-icon>
+    }
+    <ng-content />
+    @if (icon && iconPosition === 'right') {
+      <lucide-icon [name]="icon" [size]="iconSize" aria-hidden="true"></lucide-icon>
+    }
+  </span>
+</button>

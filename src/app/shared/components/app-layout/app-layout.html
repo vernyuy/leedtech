@@ -1,0 +1,25 @@
+<div class="h-screen w-screen bg-slate-50 flex flex-col">
+  <lib-top-nav
+    [notifications]="notifications()"
+    [user]="resolvedUser()"
+    [isMobile]="isMobile()"
+  >
+    <ng-content select="[layout-header-left]" top-nav-left></ng-content>
+  </lib-top-nav>
+
+  <div class="flex flex-1 min-h-0 w-full overflow-hidden">
+    <app-side-nav
+      class="shrink-0 h-full"
+      [class.w-64]="!isCollapsed()"
+      [class.w-20]="isCollapsed()"
+      [title]="navTitle()"
+      [items]="navItems()"
+      [collapsed]="isCollapsed()"
+      (collapseToggle)="toggleSideNav()"
+    ></app-side-nav>
+
+    <main class="flex-1 min-h-0 w-full overflow-y-auto p-6">
+      <ng-content></ng-content>
+    </main>
+  </div>
+</div>

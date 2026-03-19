@@ -1,0 +1,81 @@
+@if (open) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/40" (click)="onClose()"></div>
+    <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.25)]">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900">Make payment</h3>
+          <p class="text-sm text-slate-500">Submit a one-time payment for this account.</p>
+        </div>
+        <button
+          type="button"
+          class="rounded-full px-2 py-1 text-slate-500 hover:bg-slate-100"
+          (click)="onClose()"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form class="mt-6 flex flex-col gap-4" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+        <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Student</div>
+          <div class="font-semibold text-slate-900">{{ studentName }}</div>
+        </div>
+
+        <lib-text-field
+          label="Payment amount"
+          placeholder="Enter payment amount"
+          type="number"
+          formControlName="paymentAmount"
+          [ariaInvalid]="paymentAmountInvalid"
+          [errorMessage]="paymentAmountError"
+        ></lib-text-field>
+
+        <lib-text-field
+          label="Currency"
+          placeholder="XAF"
+          type="text"
+          formControlName="currency"
+          [ariaInvalid]="currencyInvalid"
+          [errorMessage]="currencyError"
+        ></lib-text-field>
+
+        <lib-text-field
+          label="Payment date"
+          type="date"
+          formControlName="paymentDate"
+          [ariaInvalid]="paymentDateInvalid"
+          [errorMessage]="paymentDateError"
+        ></lib-text-field>
+
+        <input type="hidden" formControlName="studentNumber" />
+        <input type="hidden" formControlName="idempotencyKey" />
+
+        @if (errorMessage) {
+          <app-form-error [message]="errorMessage"></app-form-error>
+        }
+
+        <div class="flex flex-wrap justify-end gap-3">
+          <lib-button
+            variant="outline"
+            size="sm"
+            [disabled]="submitting"
+            (clicked)="onClose()"
+          >
+            Cancel
+          </lib-button>
+          <lib-button
+            variant="primary"
+            size="sm"
+            type="submit"
+            [loading]="submitting"
+            [disabled]="submitting"
+          >
+            Submit payment
+          </lib-button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

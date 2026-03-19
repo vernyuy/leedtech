@@ -1,0 +1,15 @@
+<section
+  class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-[0_12px_30px_rgba(15,23,42,0.06)]"
+  [class.text-center]="align() === 'center'"
+  [class.text-right]="align() === 'end'"
+>
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-semibold text-slate-900">{{ title() }}</h1>
+    @if (subtitle()) {
+      <p class="text-sm text-slate-500">{{ subtitle() }}</p>
+    }
+  </div>
+  <div class="flex flex-wrap items-center gap-3">
+    <ng-content></ng-content>
+  </div>
+</section>

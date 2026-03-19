@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .text-field .ant-input,
+:host ::ng-deep .text-field .ant-input-affix-wrapper {
+  border-radius: 0.5rem;
+}
+
+:host ::ng-deep .text-field .ant-input-affix-wrapper .ant-input {
+  padding: 0;
+}
+
+:host ::ng-deep .text-field .ant-input-affix-wrapper-disabled {
+  background-color: #f5f7fa;
+}

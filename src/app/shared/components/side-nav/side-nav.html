@@ -1,0 +1,47 @@
+<nav
+  class="flex h-full flex-col overflow-hidden border border-slate-200 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+>
+  <div class="flex items-center justify-between pb-3">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" [class.hidden]="collapsed()">
+      {{ title() }}
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
+      (click)="toggleCollapsed()"
+      [attr.aria-label]="collapsed() ? 'Expand side navigation' : 'Collapse side navigation'"
+    >
+      <nz-icon [nzType]="collapsed() ? 'menu-unfold' : 'menu-fold'"></nz-icon>
+    </button>
+  </div>
+  <ul
+    nz-menu
+    nzMode="inline"
+    [nzInlineCollapsed]="collapsed()"
+    class="flex-1 min-h-0 w-full"
+  >
+    @for (item of items(); track item.route) {
+      <li nz-menu-item nzMatchRouter class="rounded-lg">
+        <a
+          [routerLink]="item.route"
+          class="flex items-center justify-between"
+          [class.justify-center]="collapsed()"
+        >
+          <span class="flex items-center gap-2 text-sm font-medium text-slate-700">
+            @if (item.nzIcon) {
+              <nz-icon [nzType]="item.nzIcon" class="text-[14px] text-slate-500"></nz-icon>
+            }
+            @if (!collapsed()) {
+              {{ item.label }}
+            }
+          </span>
+          @if (!collapsed() && item.badge !== undefined && item.badge !== null) {
+            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+              {{ item.badge }}
+            </span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
