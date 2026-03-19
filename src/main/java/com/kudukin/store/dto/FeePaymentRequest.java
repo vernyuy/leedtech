@@ -20,6 +20,13 @@ public class FeePaymentRequest {
     @DecimalMin(value = "0.01", message = "Payment must be greater than zero")
     private BigDecimal paymentAmount;
 
+    @NotBlank
+    @Size(min = 3, max = 3, message = "Currency must be a 3-letter code")
+    private String currency;
+
+
+    private String idempotencyKey;
+
     // ✅ Getter and Setter for paymentDate
     private LocalDate paymentDate;
 

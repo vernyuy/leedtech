@@ -1,9 +1,13 @@
 package com.kudukin.store.service;
 
 import com.kudukin.store.entity.*;
+import com.kudukin.store.exception.AccountNotFoundException;
+import com.kudukin.store.exception.StudentNotFoundException;
 import com.kudukin.store.repository.*;
 
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -30,6 +34,8 @@ public class FeePaymentService {
     @Transactional
     public FeePayment processPayment(String studentNumber,
                                      BigDecimal paymentAmount,
+                                     String currency,
+                                     String idempotencyKey,
                                      LocalDate paymentDate) {
 
         if (paymentAmount == null ||
@@ -37,48 +43,99 @@ public class FeePaymentService {
             throw new IllegalArgumentException("Payment must be greater than zero");
         }
 
-        Student student = studentRepository.findById(studentNumber)
-                .orElseThrow(() ->
-                        new RuntimeException("Student not found"));
+        if (currency == null || currency.isBlank()) {
+            throw new IllegalArgumentException("Currency is required");
+        }
 
-        StudentAccount account = accountRepository
-                .findByStudent(student)
-                .orElseThrow(() ->
-                        new RuntimeException("Account not found"));
+//        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+//            throw new IllegalArgumentException("Idempotency key is required");
+//        }
 
-        BigDecimal previousBalance = account.getBalance();
+        // Return existing payment if already processed
+        FeePayment existingPayment =
+                paymentRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
+        if (existingPayment != null) {
+            return existingPayment;
+        }
 
-        // 1️⃣ Calculate incentive rate
-        BigDecimal rate = calculateRate(paymentAmount);
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                Student student = studentRepository.findById(studentNumber)
+                        .orElseThrow(() ->
+                                new StudentNotFoundException("Student not found: " + studentNumber));
 
-        // 2️⃣ Calculate incentive amount
-        BigDecimal incentiveAmount = paymentAmount
-                .multiply(rate)
-                .setScale(2, RoundingMode.HALF_UP);
+                StudentAccount account = accountRepository
+                        .findByStudent(student)
+                        .orElseThrow(() ->
+                                new AccountNotFoundException("Account not found for student: " + studentNumber));
 
-        // 3️⃣ Total reduction
-        BigDecimal totalReduction = paymentAmount.add(incentiveAmount);
+                if (!account.getCurrency().equalsIgnoreCase(currency)) {
+                    throw new IllegalArgumentException("Currency mismatch for account");
+                }
 
-        // 4️⃣ Update balance
-        BigDecimal newBalance = previousBalance.subtract(totalReduction);
-        account.setBalance(newBalance);
+                BigDecimal previousBalance = account.getBalance();
 
-        // 5️⃣ Calculate next due date
-        LocalDate nextDueDate = calculateNextDueDate(paymentDate);
-        account.setNextDueDate(nextDueDate);
+                // 1) Calculate incentive rate
+                BigDecimal rate = calculateRate(paymentAmount);
 
-        accountRepository.save(account);
+                // 2) Calculate incentive amount
+                BigDecimal incentiveAmount = paymentAmount
+                        .multiply(rate)
+                        .setScale(2, RoundingMode.HALF_UP);
 
-        // 6️⃣ Save payment record
-        FeePayment payment = new FeePayment();
-        payment.setStudent(student);
-        payment.setPaymentAmount(paymentAmount);
-        payment.setIncentiveRate(rate);
-        payment.setIncentiveAmount(incentiveAmount);
-        payment.setTotalReduction(totalReduction);
-        payment.setPaymentDate(paymentDate);
+                // 3) Total reduction
+                BigDecimal totalReduction = paymentAmount.add(incentiveAmount);
 
-        return paymentRepository.save(payment);
+                // 4) Update balance with guard
+                BigDecimal newBalance = previousBalance.subtract(totalReduction);
+                if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+                    throw new IllegalArgumentException("Insufficient balance for payment");
+                }
+                account.setBalance(newBalance);
+
+                // 5) Calculate next due date
+                LocalDate nextDueDate = calculateNextDueDate(paymentDate);
+                account.setNextDueDate(nextDueDate);
+
+                accountRepository.save(account);
+                accountRepository.flush();
+
+                // 6) Save payment record
+                FeePayment payment = new FeePayment();
+                payment.setStudent(student);
+                payment.setPaymentAmount(paymentAmount);
+                payment.setCurrency(currency.toUpperCase());
+                payment.setPreviousBalance(previousBalance);
+                payment.setNewBalance(newBalance);
+                payment.setIncentiveRate(rate);
+                payment.setIncentiveAmount(incentiveAmount);
+                payment.setTotalReduction(totalReduction);
+                if (idempotencyKey == null || idempotencyKey.isBlank()){
+                    payment.setIdempotencyKey(generateIdempotencyKey());
+                }else{
+                    payment.setIdempotencyKey(idempotencyKey);
+                }
+                payment.setPaymentDate(paymentDate);
+
+                FeePayment saved = paymentRepository.save(payment);
+                paymentRepository.flush();
+                return saved;
+            } catch (DataIntegrityViolationException ex) {
+                FeePayment alreadySaved =
+                        paymentRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
+                if (alreadySaved != null) {
+                    return alreadySaved;
+                }
+                throw ex;
+            } catch (OptimisticLockException ex) {
+                if (attempt == maxRetries) {
+                    throw ex;
+                }
+            }
+        }
+
+        throw new IllegalStateException("Payment processing failed");
     }
 
     private BigDecimal calculateRate(BigDecimal amount) {
@@ -92,6 +149,11 @@ public class FeePaymentService {
         }
 
         return new BigDecimal("0.05");
+    }
+    private String generateIdempotencyKey() {
+        String studentNumber = "IDK" + System.currentTimeMillis();
+
+        return studentNumber;
     }
 
     private LocalDate calculateNextDueDate(LocalDate paymentDate) {

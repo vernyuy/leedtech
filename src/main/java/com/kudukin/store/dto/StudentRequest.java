@@ -10,9 +10,6 @@ import lombok.Setter;
 public class StudentRequest {
 
     @NotBlank
-    private String studentNumber;
-
-    @NotBlank
     private String name;
 
     @Email

@@ -22,13 +22,13 @@ public class StudentService {
     @Transactional
     public Student createStudent(StudentRequest request) {
 
-        if (repository.existsById(request.getStudentNumber())) {
-            throw new StudentAlreadyExistsException(
-                    "Student already exists: " + request.getStudentNumber());
-        }
+//        if (repository.existsById(request.getStudentNumber())) {
+//            throw new StudentAlreadyExistsException(
+//                    "Student already exists: " + request.getStudentNumber());
+//        }
 
         Student student = new Student();
-        student.setStudentNumber(request.getStudentNumber());
+        student.setStudentNumber(generateStudentNumber());
         student.setName(request.getName());
         student.setEmail(request.getEmail());
 
@@ -72,5 +72,15 @@ public class StudentService {
         Student student = getStudentById(studentNumber);
 
         repository.delete(student);
+    }
+
+    private String generateStudentNumber() {
+        String studentNumber;
+
+        do {
+            studentNumber = "STU" + System.currentTimeMillis();
+        } while (repository.existsById(studentNumber));
+
+        return studentNumber;
     }
 }

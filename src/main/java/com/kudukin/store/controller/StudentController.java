@@ -24,6 +24,7 @@ public class StudentController {
     }
 
     // CREATE
+    @CrossOrigin(origins = "*")
     @PostMapping
     public ResponseEntity<StudentResponse> createStudent(
             @Valid @RequestBody StudentRequest request) {
@@ -50,6 +51,7 @@ public class StudentController {
     }
 
     // READ BY ID
+    @CrossOrigin(origins = "*")
     @GetMapping("/{studentNumber}")
     public ResponseEntity<StudentResponse> getStudent(
             @PathVariable String studentNumber) {
@@ -60,6 +62,7 @@ public class StudentController {
     }
 
     // UPDATE
+    @CrossOrigin(origins = "*")
     @PutMapping("/{studentNumber}")
     public ResponseEntity<StudentResponse> updateStudent(
             @PathVariable String studentNumber,
@@ -72,6 +75,7 @@ public class StudentController {
     }
 
     // DELETE
+    @CrossOrigin(origins = "*")
     @DeleteMapping("/{studentNumber}")
     public ResponseEntity<Void> deleteStudent(
             @PathVariable String studentNumber) {

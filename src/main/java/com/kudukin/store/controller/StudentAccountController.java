@@ -21,6 +21,7 @@ public class StudentAccountController {
         this.service = service;
     }
 
+    @CrossOrigin(origins = "*")
     @PostMapping
     public ResponseEntity<StudentAccountResponse> createAccount(
             @Valid @RequestBody StudentAccountRequest request) {
@@ -30,6 +31,7 @@ public class StudentAccountController {
         return ResponseEntity.ok(new StudentAccountResponse(account));
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping
     public ResponseEntity<List<StudentAccountResponse>> getAllAccounts() {
 
@@ -42,6 +44,7 @@ public class StudentAccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/{id}")
     public ResponseEntity<StudentAccountResponse> getAccount(
             @PathVariable Long id) {
@@ -51,6 +54,7 @@ public class StudentAccountController {
         return ResponseEntity.ok(new StudentAccountResponse(account));
     }
 
+    @CrossOrigin(origins = "*")
     @PutMapping("/{id}")
     public ResponseEntity<StudentAccountResponse> updateAccount(
             @PathVariable Long id,
@@ -62,6 +66,7 @@ public class StudentAccountController {
         return ResponseEntity.ok(new StudentAccountResponse(account));
     }
 
+    @CrossOrigin(origins = "*")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAccount(
             @PathVariable Long id) {

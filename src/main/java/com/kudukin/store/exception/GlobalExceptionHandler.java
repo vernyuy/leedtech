@@ -77,4 +77,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(409).body(error);
     }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<ApiError> handleAccountNotFound(
+            AccountNotFoundException ex) {
+
+        ApiError error = new ApiError(
+                404,
+                "Not Found",
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(404).body(error);
+    }
 }

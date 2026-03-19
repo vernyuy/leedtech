@@ -13,7 +13,7 @@ public class Student {
 
     @Setter
     @Id
-    @Column(name = "student_number", nullable = false, updatable = false)
+    @Column(name = "student_number", updatable = false)
     private String studentNumber;
 
     @Setter

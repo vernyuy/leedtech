@@ -22,6 +22,7 @@ public class FeePaymentController {
         this.paymentService = paymentService;
     }
 
+    @CrossOrigin(origins = "*")
     @PostMapping("/one-time")
     public ResponseEntity<FeePaymentResponse> processOneTimePayment(
             @Valid @RequestBody FeePaymentRequest request) {
@@ -31,13 +32,11 @@ public class FeePaymentController {
                         ? request.getPaymentDate()
                         : LocalDate.now();
 
-        System.out.println("controller");
-        System.out.println(request.getPaymentAmount());
-        System.out.println(request.getStudentNumber());
-
         FeePayment payment = paymentService.processPayment(
                 request.getStudentNumber(),
                 request.getPaymentAmount(),
+                request.getCurrency(),
+                request.getIdempotencyKey(),
                 paymentDate
         );
 
